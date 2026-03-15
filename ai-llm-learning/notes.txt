@@ -1,0 +1,5 @@
+Python is a powerful programming language.
+It is widely used in data science, web development and artificial intelligence.
+Learning Python helps you solve problems efficiently and create amazing projects.
+Practice every day and you will make great progress.
+Files and exceptions are important topics in Python programming.

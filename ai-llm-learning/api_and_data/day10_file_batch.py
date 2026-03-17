@@ -44,8 +44,8 @@ def main():
     '''
 
     # 指定要扫描的目录
-    folder = Path(".")
-    print("开始扫描目录：", folder.resolve())
+    folder = Path("..")
+    print("开始扫描目录：", folder.resolve())   # 将相对路径转化为绝对路径，返回Path类对象
 
     # 准备存统计结果的列表
     result = []
@@ -73,6 +73,7 @@ def main():
 #   定义输出文件路径
     out_file = folder / "file_stats.csv"
 
+    # newline=""    禁止自动换行转换
     with open(out_file, mode="w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(
             f,

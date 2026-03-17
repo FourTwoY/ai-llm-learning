@@ -1,0 +1,3 @@
+﻿file_name,file_path,file_size_bytes,char_count,preview_100_chars,encoding
+README.txt,D:\PycharmProjects\pythonProject\ai-llm-learning\document_analyzer\README.txt,570,294,# 文档信息整理工具  这是一个基于 Python 的小综合项目，用于扫描指定目录下的 `.txt` 和 `.md` 文件，并将文件信息整理成 CSV。  ## 功能说明  程序会自动扫描目标目录中的,utf-8
+requirements.txt,D:\PycharmProjects\pythonProject\ai-llm-learning\document_analyzer\requirements.txt,6,6,pandas,utf-8

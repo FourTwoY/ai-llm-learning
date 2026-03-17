@@ -7,7 +7,7 @@ try:
     char_count = 0
     char_noblank_count = 0
 
-    with open('notes.txt', 'r') as f:  # 相对路径
+    with open('../notes/notes.txt', 'r') as f:  # 相对路径
         for line in f:
             print(line.strip())
             line_count += 1

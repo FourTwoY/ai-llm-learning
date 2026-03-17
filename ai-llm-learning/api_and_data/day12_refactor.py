@@ -97,7 +97,7 @@ def main():
     """
     setup_logging()
 
-    folder = Path(".")
+    folder = Path("..")  # 返回上级目录
     output_file = folder / "file_stats.csv"
 
     logging.info(f"开始扫描目录：{folder.resolve()}")

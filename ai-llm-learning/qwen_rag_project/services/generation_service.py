@@ -1,50 +1,40 @@
 import os
+
 from openai import OpenAI
 
-
-CHAT_MODEL = "qwen3-max-2026-01-23"
+from config import get_config
 
 
 def get_client() -> OpenAI:
-    """
-    创建阿里云百炼 OpenAI 兼容客户端（北京地域）
-    """
     api_key = os.getenv("DASHSCOPE_API_KEY")
     if not api_key:
         raise ValueError("没有检测到 DASHSCOPE_API_KEY 环境变量。")
 
     return OpenAI(
         api_key=api_key,
-        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
     )
 
 
 def build_context(retrieved_chunks: list[dict]) -> str:
-    """
-    把检索结果拼成上下文
-    """
     context_parts = []
-
     for i, item in enumerate(retrieved_chunks, start=1):
         context_parts.append(
             f"""[参考材料 {i}]
-chunk_id: {item["chunk_id"]}
-source: {item.get("source")}
-text:
-{item["text"]}
+chunk_id: {item['chunk_id']}
+source: {item.get('source')}
+text: {item['text']}
 """
         )
-
     return "\n\n".join(context_parts)
 
 
 def generate_answer(query: str, retrieved_chunks: list[dict]) -> str:
-    """
-    把问题 + 检索结果送给千问生成答案
-    """
+    cfg = get_config()
+    chat_model = cfg["models"]["chat_model"]
+
     if not query.strip():
         raise ValueError("query 不能为空。")
-
     if not retrieved_chunks:
         raise ValueError("retrieved_chunks 不能为空。")
 
@@ -57,7 +47,7 @@ def generate_answer(query: str, retrieved_chunks: list[dict]) -> str:
 如果参考材料不足以回答问题，请明确说明“根据当前检索到的材料，无法确定”。
 不要编造参考材料中没有出现的事实。
 回答尽量清晰、简洁。
-""".strip()
+    """.strip()
 
     user_prompt = f"""
 用户问题：
@@ -70,15 +60,14 @@ def generate_answer(query: str, retrieved_chunks: list[dict]) -> str:
 1. 根据参考材料回答用户问题
 2. 如果材料不足，请明确说明
 3. 最后列出你使用到的参考来源 source
-""".strip()
+    """.strip()
 
     completion = client.chat.completions.create(
-        model=CHAT_MODEL,
+        model=chat_model,
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
+            {"role": "user", "content": user_prompt},
         ],
-        temperature=0.2
+        temperature=0.2,
     )
-
     return completion.choices[0].message.content

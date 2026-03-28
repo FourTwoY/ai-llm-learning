@@ -1,27 +1,23 @@
 from pydantic import BaseModel, Field
 
 
-# 前端提问
 class AskRequest(BaseModel):
     question: str = Field(..., description="用户问题")
-    top_k: int = Field(default=5, ge=1, le=10, description="召回候选数，范围 1~10")
+    top_k: int | None = Field(default=None, ge=1, le=10, description="为空时使用 config.yaml 中 retrieval.top_k")
     use_rerank: bool = Field(default=True, description="是否启用 rerank 二次精排")
 
 
-# 一天参考来源
 class ReferenceItem(BaseModel):
     source: str | None = Field(default=None, description="来源文件名")
     chunk_id: str = Field(..., description="chunk 唯一标识")
     score: float = Field(..., description="相似度分数或 rerank 分数")
 
 
-# ai回答 + 参考来源
 class AskResponse(BaseModel):
     answer: str = Field(..., description="最终回答")
     references: list[ReferenceItem] = Field(..., description="引用来源列表")
 
 
-# 重建索引结果
 class RebuildIndexResponse(BaseModel):
     message: str = Field(..., description="重建结果说明")
     doc_count: int = Field(..., description="读取到的文档数量")
@@ -34,7 +30,7 @@ class RebuildIndexResponse(BaseModel):
 
 class SearchRequest(BaseModel):
     question: str = Field(..., description="用户问题")
-    top_k: int = Field(default=10, ge=1, le=20, description="embedding 初召回数量，范围 1~20")
+    top_k: int | None = Field(default=None, ge=1, le=20, description="为空时使用 config.yaml 中 retrieval.top_k")
     use_rerank: bool = Field(default=True, description="是否启用 rerank 二次精排")
 
 
@@ -50,6 +46,5 @@ class SearchResponse(BaseModel):
     rerank_results: list[SearchResultItem] = Field(..., description="rerank 后结果；如果未启用 rerank，则为空列表")
 
 
-# 报错信息
 class ErrorResponse(BaseModel):
     detail: str = Field(..., description="错误信息")

@@ -1,0 +1,22 @@
+models:
+  chat_model: qwen3-max-2026-01-23
+  embedding_model: text-embedding-v4
+  rerank_model: qwen3-rerank
+
+chunking:
+  chunk_size: 300
+  overlap: 50
+
+retrieval:
+  top_k: 6
+  rerank_top_n: 2
+
+embedding:
+  dimension: 1024
+  batch_size: 10
+
+paths:
+  raw_dir: data/raw
+  processed_file: data/processed/docs.json
+  chunks_file: data/chunks/chunks.json
+  embeddings_file: data/embeddings/all_embeddings.json

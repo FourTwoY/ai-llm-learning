@@ -60,11 +60,17 @@ def extract_title(path: Path, text: str) -> str:
         if stripped:
             return stripped[:120]
 
+    '''path.stem = "my_python_notes"
+    替换后："my python notes"
+    return 结果：my python notes'''
     return path.stem.replace("_", " ").replace("-", " ")
 
 
+# 保证：同一文件永远生成相同 ID、不同文件 ID 不同、ID 合法可用
 def build_doc_id(path: Path, raw_root: Path) -> str:
+    # 拿到相对路径
     rel = str(path.relative_to(raw_root)).replace("\\", "/")
+    # 根据相对路径得到哈希编码
     digest = hashlib.md5(rel.encode("utf-8")).hexdigest()[:10]
     stem = re.sub(r"[^a-zA-Z0-9]+", "_", path.stem).strip("_").lower()
     return f"{stem}_{digest}" if stem else f"doc_{digest}"
@@ -90,6 +96,7 @@ def collect_docs(raw_root: Path) -> list[dict[str, Any]]:
     return docs
 
 
+# 将 Python 字典列表（文档数据）保存为格式化、可读的 UTF-8 JSON 文件的标准函数
 def save_docs(docs: list[dict[str, Any]], output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(docs, ensure_ascii=False, indent=2), encoding="utf-8")

@@ -129,6 +129,7 @@ def sliding_window_chunk(text: str, chunk_size: int = 400, overlap: int = 80) ->
 
     while start < text_length:
         end = start + chunk_size
+        # .strip(): 去除切片结果首尾的空白字符（空格、\n、\t、\r 等）
         chunk_text = text[start:end].strip()
         if chunk_text:
             chunks.append(chunk_text)
@@ -148,6 +149,9 @@ def build_chunks(docs: List[Dict], chunk_size: int = 400, overlap: int = 80) -> 
     all_chunks = []
 
     for doc in docs:
+        # 字典.get(键, 默认值)
+        # 键存在 → 返回对应值
+        # 键不存在 → 返回默认值（不抛 KeyError）
         doc_id = str(doc.get("doc_id", "unknown_doc"))
         source = str(doc.get("source", "unknown_source"))
         text = doc.get("text", "")

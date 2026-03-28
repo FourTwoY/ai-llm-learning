@@ -2,6 +2,7 @@ import math
 from .embedding_service import embed_texts
 
 
+# 负责 first-stage retrieval，也就是“问题向量”和“chunk 向量”的第一轮相似度检索
 def cosine_similarity(vec1: list[float], vec2: list[float]) -> float:
     """
     计算余弦相似度

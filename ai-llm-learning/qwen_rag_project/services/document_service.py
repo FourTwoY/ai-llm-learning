@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 
+# 负责读取已经落盘的文档/切块 JSON 数据，给上层接口直接使用
 def load_documents(file_path: str) -> list[dict]:
     """
     从本地读取已经清洗好的文档数据，例如 data/processed/docs.json

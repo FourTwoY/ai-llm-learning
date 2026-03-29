@@ -1,138 +1,102 @@
-import os
 import json
+import os
 from pathlib import Path
 
 from openai import OpenAI
 
-from config import get_config
+from .exceptions import ConfigError, EmbeddingError, DataEmptyError
+from .logger_service import log_step, log_result
+
+EMBEDDING_MODEL = "text-embedding-v4"
 
 
 def get_client() -> OpenAI:
     api_key = os.getenv("DASHSCOPE_API_KEY")
     if not api_key:
-        raise ValueError("没有检测到 DASHSCOPE_API_KEY 环境变量。")
+        raise ConfigError("没有检测到 DASHSCOPE_API_KEY 环境变量。")
 
     return OpenAI(
         api_key=api_key,
-        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
     )
 
 
-def normalize_chunks(chunks: list[dict]) -> list[dict]:
-    normalized = []
-    for i, item in enumerate(chunks):
-        if isinstance(item, str):
-            normalized.append(
-                {
-                    "chunk_id": f"chunk_{i}",
-                    "doc_id": None,
-                    "source": None,
-                    "text": item,
-                }
+def embed_texts(texts: list[str]) -> tuple[list[list[float]], dict]:
+    if not texts:
+        raise DataEmptyError("embedding 输入文本为空。")
+
+    with log_step("embedding", text_count=len(texts)):
+        try:
+            client = get_client()
+            response = client.embeddings.create(
+                model=EMBEDDING_MODEL,
+                input=texts,
+                dimensions=1024,
+                encoding_format="float",
             )
-        elif isinstance(item, dict):
-            text = item.get("text") or item.get("chunk") or item.get("content")
-            if not text:
-                raise ValueError(f"第 {i} 个 chunk 找不到 text/content/chunk 字段。")
 
-            normalized.append(
-                {
-                    "chunk_id": item.get("chunk_id", f"chunk_{i}"),
-                    "doc_id": item.get("doc_id"),
-                    "source": item.get("source"),
-                    "text": text,
-                }
-            )
-        else:
-            raise ValueError(f"第 {i} 个 chunk 格式不支持：{type(item)}")
+            vectors = [item.embedding for item in response.data]
+            usage = getattr(response, "usage", None)
 
-    return normalized
+            log_result("embedding", result_count=len(vectors), extra={"usage": usage})
+            return vectors, {"usage": str(usage) if usage else None}
 
-
-def embed_texts(texts: list[str], dimensions: int | None = None) -> tuple[list[list[float]], dict]:
-    cfg = get_config()
-    model_name = cfg["models"]["embedding_model"]
-    embedding_cfg = cfg["embedding"]
-
-    if dimensions is None:
-        dimensions = embedding_cfg["dimension"]
-
-    client = get_client()
-    response = client.embeddings.create(
-        model=model_name,
-        input=texts,
-        dimensions=dimensions,
-        encoding_format="float",
-    )
-
-    embeddings = [item.embedding for item in response.data]
-    usage = {
-        "prompt_tokens": response.usage.prompt_tokens,
-        "total_tokens": response.usage.total_tokens,
-        "model": response.model,
-        "embedding_dim": len(response.data[0].embedding),
-    }
-    return embeddings, usage
+        except ConfigError:
+            raise
+        except Exception as e:
+            raise EmbeddingError(f"embedding 调用失败：{e}") from e
 
 
 def build_chunk_embeddings(chunks: list[dict]) -> tuple[list[dict], dict]:
-    cfg = get_config()
-    embedding_cfg = cfg["embedding"]
-    model_name = cfg["models"]["embedding_model"]
-    batch_size = embedding_cfg["batch_size"]
-    embedding_dim = embedding_cfg["dimension"]
+    if not chunks:
+        raise DataEmptyError("chunks 为空，无法生成 embeddings。")
 
-    chunks = normalize_chunks(chunks)
-    all_items = []
-    total_prompt_tokens = 0
-    total_tokens = 0
+    with log_step("build_chunk_embeddings", chunk_count=len(chunks)):
+        texts = [item["text"] for item in chunks]
+        vectors, meta = embed_texts(texts)
 
-    for start in range(0, len(chunks), batch_size):
-        batch = chunks[start : start + batch_size]
-        batch_texts = [item["text"] for item in batch]
-        batch_embeddings, usage = embed_texts(batch_texts, dimensions=embedding_dim)
+        items = []
+        for chunk, vector in zip(chunks, vectors):
+            items.append({
+                "chunk_id": chunk["chunk_id"],
+                "doc_id": chunk.get("doc_id"),
+                "source": chunk.get("source"),
+                "text": chunk["text"],
+                "embedding": vector,
+            })
 
-        total_prompt_tokens += usage["prompt_tokens"]
-        total_tokens += usage["total_tokens"]
-
-        for item, emb in zip(batch, batch_embeddings):
-            all_items.append(
-                {
-                    "chunk_id": item["chunk_id"],
-                    "doc_id": item.get("doc_id"),
-                    "source": item.get("source"),
-                    "text": item["text"],
-                    "embedding": emb,
-                }
-            )
-
-    meta = {
-        "count": len(all_items),
-        "model": model_name,
-        "embedding_dim": embedding_dim,
-        "prompt_tokens": total_prompt_tokens,
-        "total_tokens": total_tokens,
-    }
-
-    return all_items, meta
+        log_result("build_chunk_embeddings", result_count=len(items))
+        return items, meta
 
 
-def save_embeddings(file_path: str, items: list[dict], meta: dict):
-    path = Path(file_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {"meta": meta, "items": items}
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+def save_embeddings(filepath: str, items: list[dict], meta: dict | None = None):
+    with log_step("save_embeddings", filepath=filepath, item_count=len(items)):
+        path = Path(filepath)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        payload = {
+            "meta": meta or {},
+            "items": items,
+        }
+
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, ensure_ascii=False)
+
+        log_result("save_embeddings", result_count=len(items), extra={"filepath": filepath})
 
 
-def load_embeddings(file_path: str) -> list[dict]:
-    path = Path(file_path)
-    if not path.exists():
-        raise FileNotFoundError(f"找不到 embedding 文件：{file_path}")
+def load_embeddings(filepath: str) -> list[dict]:
+    with log_step("load_embeddings", filepath=filepath):
+        path = Path(filepath)
+        if not path.exists():
+            raise DataEmptyError(f"embeddings 文件不存在：{filepath}")
 
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    if isinstance(payload, dict) and "items" in payload:
-        return payload["items"]
-    if isinstance(payload, list):
-        return payload
+        with open(path, "r", encoding="utf-8") as f:
+            payload = json.load(f)
 
-    raise ValueError("embedding 文件格式不合法。")
+        items = payload.get("items", [])
+        if not items:
+            raise DataEmptyError("embeddings 文件为空。")
+
+        log_result("load_embeddings", result_count=len(items))
+        return items

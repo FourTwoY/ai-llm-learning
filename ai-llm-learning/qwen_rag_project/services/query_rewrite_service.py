@@ -2,13 +2,16 @@ import os
 import re
 from openai import OpenAI
 
+from .exceptions import ConfigError
+from .logger_service import log_step, log_result
+
 REWRITE_MODEL = "qwen3-max-2026-01-23"
 
 
 def get_client() -> OpenAI:
     api_key = os.getenv("DASHSCOPE_API_KEY")
     if not api_key:
-        raise ValueError("没有检测到 DASHSCOPE_API_KEY 环境变量。")
+        raise ConfigError("没有检测到 DASHSCOPE_API_KEY 环境变量。")
 
     return OpenAI(
         api_key=api_key,
@@ -17,12 +20,6 @@ def get_client() -> OpenAI:
 
 
 def simple_rule_rewrite(question: str) -> str:
-    """
-    一个兜底的规则版 rewrite：
-    - 去空白
-    - 去掉明显口语废话
-    - 保留原核心问题
-    """
     q = question.strip()
 
     filler_patterns = [
@@ -39,62 +36,55 @@ def simple_rule_rewrite(question: str) -> str:
         q = re.sub(pattern, "", q)
 
     q = re.sub(r"\s+", " ", q).strip("，。！？；： ")
-
     return q or question.strip()
 
 
 def rewrite_query(question: str) -> str:
-    """
-    用 LLM 做一次轻量 query rewrite：
-    - 不改变用户真实意图
-    - 去掉寒暄和废话
-    - 改写成更适合检索的短句
-    - 只输出改写后的 query
-    """
     if not question or not question.strip():
         raise ValueError("question 不能为空。")
 
-    client = get_client()
+    with log_step("rewrite", question=question):
+        client = get_client()
 
-    system_prompt = """
+        system_prompt = """
 你是一个 RAG 检索优化助手。
-你的任务是把用户原问题改写成“更适合知识库检索的 query”。
+你的任务是把用户原问题改写成更适合知识库检索的 query。
 
 要求：
-1. 保留原始问题意图，不要改变意思
+1. 保留原始问题意图，不改变意思
 2. 去掉寒暄、废话、口语化表达
 3. 改写后尽量更明确、更短、更像搜索 query
 4. 不要回答问题
 5. 不要补充原问题里没有的新事实
-6. 只输出“改写后的 query 本身”，不要输出解释
+6. 只输出改写后的 query 本身，不要输出解释
 """.strip()
 
-    user_prompt = f"""
+        user_prompt = f"""
 原问题：
 {question}
 
 请输出改写后的 query：
 """.strip()
 
-    try:
-        completion = client.chat.completions.create(
-            model=REWRITE_MODEL,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=0.0,
-        )
-        rewritten = completion.choices[0].message.content.strip()
+        try:
+            completion = client.chat.completions.create(
+                model=REWRITE_MODEL,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0.0,
+            )
+            rewritten = completion.choices[0].message.content.strip()
+            rewritten = rewritten.replace("改写后的 query：", "").replace("改写后的query：", "").strip()
 
-        # 防止模型输出多余前缀
-        rewritten = rewritten.replace("改写后的 query：", "").replace("改写后的query：", "").strip()
+            if not rewritten:
+                rewritten = simple_rule_rewrite(question)
 
-        if not rewritten:
-            return simple_rule_rewrite(question)
+            log_result("rewrite", result_count=1, extra={"rewritten_query": rewritten})
+            return rewritten
 
-        return rewritten
-
-    except Exception:
-        # LLM 改写失败时，退化到规则版
-        return simple_rule_rewrite(question)
+        except Exception:
+            rewritten = simple_rule_rewrite(question)
+            log_result("rewrite", result_count=1, extra={"fallback": True, "rewritten_query": rewritten})
+            return rewritten

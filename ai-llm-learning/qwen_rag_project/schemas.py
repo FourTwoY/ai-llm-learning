@@ -3,8 +3,12 @@ from pydantic import BaseModel, Field
 
 class AskRequest(BaseModel):
     question: str = Field(..., description="用户问题")
-    top_k: int | None = Field(default=None, ge=1, le=10, description="为空时使用 config.yaml 中 retrieval.top_k")
+    top_k: int = Field(default=5, ge=1, le=10, description="召回候选数，范围 1~10")
     use_rerank: bool = Field(default=True, description="是否启用 rerank 二次精排")
+    use_rewrite: bool = Field(default=True, description="是否启用 query rewrite")
+    use_hybrid: bool = Field(default=True, description="是否启用 hybrid retrieval")
+    vector_weight: float = Field(default=0.7, ge=0.0, le=1.0, description="向量分权重")
+    keyword_weight: float = Field(default=0.3, ge=0.0, le=1.0, description="关键词分权重")
 
 
 class ReferenceItem(BaseModel):
@@ -14,6 +18,8 @@ class ReferenceItem(BaseModel):
 
 
 class AskResponse(BaseModel):
+    original_question: str = Field(..., description="用户原问题")
+    rewritten_query: str = Field(..., description="改写后的检索 query")
     answer: str = Field(..., description="最终回答")
     references: list[ReferenceItem] = Field(..., description="引用来源列表")
 
@@ -30,20 +36,29 @@ class RebuildIndexResponse(BaseModel):
 
 class SearchRequest(BaseModel):
     question: str = Field(..., description="用户问题")
-    top_k: int | None = Field(default=None, ge=1, le=20, description="为空时使用 config.yaml 中 retrieval.top_k")
+    top_k: int = Field(default=10, ge=1, le=20, description="初召回数量，范围 1~20")
     use_rerank: bool = Field(default=True, description="是否启用 rerank 二次精排")
+    use_rewrite: bool = Field(default=True, description="是否启用 query rewrite")
+    use_hybrid: bool = Field(default=True, description="是否启用 hybrid retrieval")
+    vector_weight: float = Field(default=0.7, ge=0.0, le=1.0, description="向量分权重")
+    keyword_weight: float = Field(default=0.3, ge=0.0, le=1.0, description="关键词分权重")
 
 
 class SearchResultItem(BaseModel):
     chunk_id: str = Field(..., description="chunk 唯一标识")
     source: str | None = Field(default=None, description="来源文件名")
-    score: float = Field(..., description="相似度分数或 rerank 分数")
+    score: float = Field(..., description="最终排序分数")
     text: str = Field(..., description="chunk 文本内容")
+    vector_score: float | None = Field(default=None, description="归一化后的向量分")
+    keyword_score: float | None = Field(default=None, description="关键词分")
 
 
 class SearchResponse(BaseModel):
-    embedding_results: list[SearchResultItem] = Field(..., description="embedding 初召回结果")
-    rerank_results: list[SearchResultItem] = Field(..., description="rerank 后结果；如果未启用 rerank，则为空列表")
+    original_question: str = Field(..., description="用户原问题")
+    rewritten_query: str = Field(..., description="改写后的检索 query")
+    embedding_results: list[SearchResultItem] = Field(..., description="纯 embedding 初召回结果")
+    hybrid_results: list[SearchResultItem] = Field(..., description="hybrid 检索结果；如果未启用 hybrid，则为空列表")
+    rerank_results: list[SearchResultItem] = Field(..., description="对 hybrid 或 embedding 结果做 rerank 后的结果")
 
 
 class ErrorResponse(BaseModel):

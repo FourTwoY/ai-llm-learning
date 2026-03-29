@@ -5,7 +5,7 @@ from .embedding_service import embed_texts
 from .retrieval_service import cosine_similarity
 from .exceptions import InvalidRequestError, DataEmptyError
 from .logger_service import log_step, log_result
-
+from config import get_config
 
 def tokenize(text: str) -> list[str]:
     if not text:
@@ -65,14 +65,24 @@ def normalize_vector_score(score: float) -> float:
 def hybrid_retrieve_chunks(
     query: str,
     embedded_chunks: list[dict],
-    top_k: int = 5,
-    vector_weight: float = 0.7,
-    keyword_weight: float = 0.3,
+    top_k: int | None = None,
+    vector_weight: float | None = None,
+    keyword_weight: float | None = None,
 ) -> list[dict]:
     if not query.strip():
         raise InvalidRequestError("query 不能为空。")
     if not embedded_chunks:
         raise DataEmptyError("embedded_chunks 为空。")
+
+    cfg = get_config()
+
+    if top_k is None:
+        top_k = cfg["retrieval"]["top_k"]
+    if vector_weight is None:
+        vector_weight = cfg["retrieval"]["vector_weight"]
+    if keyword_weight is None:
+        keyword_weight = cfg["retrieval"]["keyword_weight"]
+
     if abs((vector_weight + keyword_weight) - 1.0) > 1e-8:
         raise InvalidRequestError("vector_weight 和 keyword_weight 之和必须等于 1.0。")
 

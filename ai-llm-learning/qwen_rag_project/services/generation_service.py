@@ -4,7 +4,7 @@ from openai import OpenAI
 from .exceptions import ConfigError, InvalidRequestError, DataEmptyError, GenerationError
 from .logger_service import log_step, log_result
 
-CHAT_MODEL = "qwen3-max-2026-01-23"
+from config import get_config
 
 
 def get_client() -> OpenAI:
@@ -37,6 +37,9 @@ def generate_answer(query: str, retrieved_chunks: list[dict]) -> str:
     if not retrieved_chunks:
         raise DataEmptyError("retrieved_chunks 不能为空。")
 
+    cfg = get_config()
+    chat_model = cfg["models"]["generation"]
+
     with log_step("generate", query=query, chunk_count=len(retrieved_chunks)):
         try:
             client = get_client()
@@ -64,7 +67,7 @@ def generate_answer(query: str, retrieved_chunks: list[dict]) -> str:
 """.strip()
 
             completion = client.chat.completions.create(
-                model=CHAT_MODEL,
+                model=chat_model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt}

@@ -5,6 +5,8 @@ import uuid
 from contextlib import contextmanager
 from contextvars import ContextVar
 
+from config import get_config
+
 request_id_var: ContextVar[str] = ContextVar("request_id", default="-")
 
 
@@ -15,15 +17,19 @@ class RequestIdFilter(logging.Filter):
 
 
 def setup_logger(name: str = "qwen_rag_project") -> logging.Logger:
+    cfg = get_config()
+    level_name = cfg.get("logging", {}).get("level", "INFO").upper()
+    level = getattr(logging, level_name, logging.INFO)
+
     logger = logging.getLogger(name)
 
     if logger.handlers:
         return logger
 
-    logger.setLevel(logging.INFO)
+    logger.setLevel(level)
 
     handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.INFO)
+    handler.setLevel(level)
     handler.addFilter(RequestIdFilter())
 
     formatter = logging.Formatter(

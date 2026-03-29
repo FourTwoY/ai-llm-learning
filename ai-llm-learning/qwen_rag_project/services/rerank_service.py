@@ -4,21 +4,26 @@ from http import HTTPStatus
 from .exceptions import InvalidRequestError, DataEmptyError, RerankError
 from .logger_service import log_step, log_result
 
-RERANK_MODEL = "qwen3-rerank"
+from config import get_config
 
 
-def rerank_chunks(query: str, retrieved_chunks: list[dict], top_k: int = 3) -> list[dict]:
+def rerank_chunks(query: str, retrieved_chunks: list[dict], top_k: int | None = None) -> list[dict]:
     if not query.strip():
         raise InvalidRequestError("query 不能为空。")
     if not retrieved_chunks:
         raise DataEmptyError("retrieved_chunks 不能为空。")
+
+    cfg = get_config()
+    rerank_model = cfg["models"]["rerank"]
+    if top_k is None:
+        top_k = cfg["retrieval"]["rerank_top_n"]
 
     with log_step("rerank", query=query, input_count=len(retrieved_chunks), top_k=top_k):
         documents = [item["text"] for item in retrieved_chunks]
 
         try:
             resp = dashscope.TextReRank.call(
-                model=RERANK_MODEL,
+                model=rerank_model,
                 query=query,
                 documents=documents,
                 top_n=min(top_k, len(documents)),

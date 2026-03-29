@@ -5,7 +5,7 @@ from openai import OpenAI
 from .exceptions import ConfigError
 from .logger_service import log_step, log_result
 
-REWRITE_MODEL = "qwen3-max-2026-01-23"
+from config import get_config
 
 
 def get_client() -> OpenAI:
@@ -43,6 +43,9 @@ def rewrite_query(question: str) -> str:
     if not question or not question.strip():
         raise ValueError("question 不能为空。")
 
+    cfg = get_config()
+    rewrite_model = cfg["models"]["rewrite"]
+
     with log_step("rewrite", question=question):
         client = get_client()
 
@@ -68,7 +71,7 @@ def rewrite_query(question: str) -> str:
 
         try:
             completion = client.chat.completions.create(
-                model=REWRITE_MODEL,
+                model=rewrite_model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},

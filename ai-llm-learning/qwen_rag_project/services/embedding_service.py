@@ -7,7 +7,7 @@ from openai import OpenAI
 from .exceptions import ConfigError, EmbeddingError, DataEmptyError
 from .logger_service import log_step, log_result
 
-EMBEDDING_MODEL = "text-embedding-v4"
+from config import get_config
 
 
 def get_client() -> OpenAI:
@@ -25,11 +25,14 @@ def embed_texts(texts: list[str]) -> tuple[list[list[float]], dict]:
     if not texts:
         raise DataEmptyError("embedding 输入文本为空。")
 
+    cfg = get_config()
+    embedding_model = cfg["models"]["embedding"]
+
     with log_step("embedding", text_count=len(texts)):
         try:
             client = get_client()
             response = client.embeddings.create(
-                model=EMBEDDING_MODEL,
+                model=embedding_model,
                 input=texts,
                 dimensions=1024,
                 encoding_format="float",

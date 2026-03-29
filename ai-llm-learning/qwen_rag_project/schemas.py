@@ -3,12 +3,12 @@ from pydantic import BaseModel, Field
 
 class AskRequest(BaseModel):
     question: str = Field(..., description="用户问题")
-    top_k: int = Field(default=5, ge=1, le=10, description="召回候选数，范围 1~10")
-    use_rerank: bool = Field(default=True, description="是否启用 rerank 二次精排")
-    use_rewrite: bool = Field(default=True, description="是否启用 query rewrite")
-    use_hybrid: bool = Field(default=True, description="是否启用 hybrid retrieval")
-    vector_weight: float = Field(default=0.7, ge=0.0, le=1.0, description="向量分权重")
-    keyword_weight: float = Field(default=0.3, ge=0.0, le=1.0, description="关键词分权重")
+    top_k: int | None = Field(default=None, ge=1, le=20, description="召回候选数")
+    use_rerank: bool | None = Field(default=None, description="是否启用 rerank")
+    use_rewrite: bool | None = Field(default=None, description="是否启用 query rewrite")
+    use_hybrid: bool | None = Field(default=None, description="是否启用 hybrid retrieval")
+    vector_weight: float | None = Field(default=None, ge=0.0, le=1.0, description="向量分权重")
+    keyword_weight: float | None = Field(default=None, ge=0.0, le=1.0, description="关键词分权重")
 
 
 class ReferenceItem(BaseModel):
@@ -36,12 +36,12 @@ class RebuildIndexResponse(BaseModel):
 
 class SearchRequest(BaseModel):
     question: str = Field(..., description="用户问题")
-    top_k: int = Field(default=10, ge=1, le=20, description="初召回数量，范围 1~20")
-    use_rerank: bool = Field(default=True, description="是否启用 rerank 二次精排")
-    use_rewrite: bool = Field(default=True, description="是否启用 query rewrite")
-    use_hybrid: bool = Field(default=True, description="是否启用 hybrid retrieval")
-    vector_weight: float = Field(default=0.7, ge=0.0, le=1.0, description="向量分权重")
-    keyword_weight: float = Field(default=0.3, ge=0.0, le=1.0, description="关键词分权重")
+    top_k: int | None = Field(default=None, ge=1, le=20, description="初召回数量")
+    use_rerank: bool | None = Field(default=None, description="是否启用 rerank")
+    use_rewrite: bool | None = Field(default=None, description="是否启用 query rewrite")
+    use_hybrid: bool | None = Field(default=None, description="是否启用 hybrid retrieval")
+    vector_weight: float | None = Field(default=None, ge=0.0, le=1.0, description="向量分权重")
+    keyword_weight: float | None = Field(default=None, ge=0.0, le=1.0, description="关键词分权重")
 
 
 class SearchResultItem(BaseModel):

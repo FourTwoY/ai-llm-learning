@@ -29,8 +29,7 @@ from services.query_rewrite_service import rewrite_query
 from services.logger_service import logger, set_request_id, log_step, log_result
 from services.exceptions import AppError, InvalidRequestError
 
-CHUNKS_FILE = "data/chunks/chunks.json"
-EMBEDDINGS_FILE = "data/embeddings/all_embeddings.json"
+from config import get_config
 
 app = FastAPI(
     title="Qwen RAG API",
@@ -94,14 +93,18 @@ async def handle_unexpected_error(request: Request, exc: Exception):
 
 
 def ensure_embeddings_ready():
-    embeddings_path = Path(EMBEDDINGS_FILE)
+    cfg = get_config()
+    chunks_file = cfg["paths"]["chunks_file"]
+    embeddings_file = cfg["paths"]["embeddings_file"]
+
+    embeddings_path = Path(embeddings_file)
     if embeddings_path.exists():
         return
 
-    with log_step("ensure_embeddings_ready", embeddings_file=EMBEDDINGS_FILE):
-        chunks = chunk_documents(CHUNKS_FILE)
+    with log_step("ensure_embeddings_ready", embeddings_file=embeddings_file):
+        chunks = chunk_documents(chunks_file)
         items, meta = build_chunk_embeddings(chunks)
-        save_embeddings(EMBEDDINGS_FILE, items, meta)
+        save_embeddings(embeddings_file, items, meta)
         log_result("ensure_embeddings_ready", result_count=len(items))
 
 
@@ -121,49 +124,59 @@ def ping():
 
 @app.post("/ask", response_model=AskResponse)
 def ask(request: AskRequest):
+    cfg = get_config()
+
     original_question = request.question.strip()
     if not original_question:
         raise InvalidRequestError("question 不能为空。")
 
-    if abs((request.vector_weight + request.keyword_weight) - 1.0) > 1e-8:
+    top_k = request.top_k if request.top_k is not None else cfg["retrieval"]["top_k"]
+    use_rerank = request.use_rerank if request.use_rerank is not None else True
+    use_rewrite = request.use_rewrite if request.use_rewrite is not None else cfg["rewrite"]["use_rewrite"]
+    use_hybrid = request.use_hybrid if request.use_hybrid is not None else cfg["retrieval"]["use_hybrid"]
+    vector_weight = request.vector_weight if request.vector_weight is not None else cfg["retrieval"]["vector_weight"]
+    keyword_weight = request.keyword_weight if request.keyword_weight is not None else cfg["retrieval"]["keyword_weight"]
+    rerank_top_n = cfg["retrieval"]["rerank_top_n"]
+
+    if abs((vector_weight + keyword_weight) - 1.0) > 1e-8:
         raise InvalidRequestError("vector_weight 和 keyword_weight 之和必须等于 1.0。")
 
     with log_step(
         "ask_api",
         question=original_question,
-        top_k=request.top_k,
-        use_rerank=request.use_rerank,
-        use_rewrite=request.use_rewrite,
-        use_hybrid=request.use_hybrid,
+        top_k=top_k,
+        use_rerank=use_rerank,
+        use_rewrite=use_rewrite,
+        use_hybrid=use_hybrid,
     ):
-        rewritten_query = rewrite_query(original_question) if request.use_rewrite else original_question
+        rewritten_query = rewrite_query(original_question) if use_rewrite else original_question
 
         ensure_embeddings_ready()
-        embedded_chunks = load_embeddings(EMBEDDINGS_FILE)
+        embedded_chunks = load_embeddings(cfg["paths"]["embeddings_file"])
 
-        if request.use_hybrid:
+        if use_hybrid:
             retrieved_chunks = hybrid_retrieve_chunks(
                 query=rewritten_query,
                 embedded_chunks=embedded_chunks,
-                top_k=request.top_k,
-                vector_weight=request.vector_weight,
-                keyword_weight=request.keyword_weight,
+                top_k=top_k,
+                vector_weight=vector_weight,
+                keyword_weight=keyword_weight,
             )
         else:
             retrieved_chunks = retrieve_chunks(
                 rewritten_query,
                 embedded_chunks,
-                top_k=request.top_k
+                top_k=top_k
             )
 
-        if request.use_rerank:
+        if use_rerank:
             final_chunks = rerank_chunks(
                 rewritten_query,
                 retrieved_chunks,
-                top_k=min(3, len(retrieved_chunks))
+                top_k=min(rerank_top_n, len(retrieved_chunks))
             )
         else:
-            final_chunks = retrieved_chunks[:min(3, len(retrieved_chunks))]
+            final_chunks = retrieved_chunks[:min(rerank_top_n, len(retrieved_chunks))]
 
         answer = generate_answer(original_question, final_chunks)
 
@@ -186,60 +199,62 @@ def ask(request: AskRequest):
         )
 
 
-@app.post("/rebuild_index", response_model=RebuildIndexResponse)
-def rebuild_index_api():
-    with log_step("rebuild_index_api"):
-        result = rebuild_index()
-        log_result("rebuild_index_api", result_count=result["embedding_count"])
-        return RebuildIndexResponse(**result)
-
-
 @app.post("/search", response_model=SearchResponse)
 def search(request: SearchRequest):
+    cfg = get_config()
+
     original_question = request.question.strip()
     if not original_question:
         raise InvalidRequestError("question 不能为空。")
 
-    if abs((request.vector_weight + request.keyword_weight) - 1.0) > 1e-8:
+    top_k = request.top_k if request.top_k is not None else cfg["retrieval"]["top_k"]
+    use_rerank = request.use_rerank if request.use_rerank is not None else True
+    use_rewrite = request.use_rewrite if request.use_rewrite is not None else cfg["rewrite"]["use_rewrite"]
+    use_hybrid = request.use_hybrid if request.use_hybrid is not None else cfg["retrieval"]["use_hybrid"]
+    vector_weight = request.vector_weight if request.vector_weight is not None else cfg["retrieval"]["vector_weight"]
+    keyword_weight = request.keyword_weight if request.keyword_weight is not None else cfg["retrieval"]["keyword_weight"]
+    rerank_top_n = cfg["retrieval"]["rerank_top_n"]
+
+    if abs((vector_weight + keyword_weight) - 1.0) > 1e-8:
         raise InvalidRequestError("vector_weight 和 keyword_weight 之和必须等于 1.0。")
 
     with log_step(
         "search_api",
         question=original_question,
-        top_k=request.top_k,
-        use_rerank=request.use_rerank,
-        use_rewrite=request.use_rewrite,
-        use_hybrid=request.use_hybrid,
+        top_k=top_k,
+        use_rerank=use_rerank,
+        use_rewrite=use_rewrite,
+        use_hybrid=use_hybrid,
     ):
-        rewritten_query = rewrite_query(original_question) if request.use_rewrite else original_question
+        rewritten_query = rewrite_query(original_question) if use_rewrite else original_question
 
         ensure_embeddings_ready()
-        embedded_chunks = load_embeddings(EMBEDDINGS_FILE)
+        embedded_chunks = load_embeddings(cfg["paths"]["embeddings_file"])
 
         embedding_results = retrieve_chunks(
             rewritten_query,
             embedded_chunks,
-            top_k=request.top_k
+            top_k=top_k
         )
 
-        if request.use_hybrid:
+        if use_hybrid:
             hybrid_results = hybrid_retrieve_chunks(
                 query=rewritten_query,
                 embedded_chunks=embedded_chunks,
-                top_k=request.top_k,
-                vector_weight=request.vector_weight,
-                keyword_weight=request.keyword_weight,
+                top_k=top_k,
+                vector_weight=vector_weight,
+                keyword_weight=keyword_weight,
             )
             rerank_input = hybrid_results
         else:
             hybrid_results = []
             rerank_input = embedding_results
 
-        if request.use_rerank:
+        if use_rerank:
             rerank_results = rerank_chunks(
                 rewritten_query,
                 rerank_input,
-                top_k=min(3, len(rerank_input))
+                top_k=min(rerank_top_n, len(rerank_input))
             )
         else:
             rerank_results = []

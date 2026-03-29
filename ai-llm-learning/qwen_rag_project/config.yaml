@@ -1,22 +1,28 @@
 models:
-  chat_model: qwen3-max-2026-01-23
-  embedding_model: text-embedding-v4
-  rerank_model: qwen3-rerank
+  generation: "qwen3-max-2026-01-23"
+  embedding: "text-embedding-v4"
+  rerank: "qwen3-rerank"
+  rewrite: "qwen3-max-2026-01-23"
 
 chunking:
-  chunk_size: 300
-  overlap: 50
+  chunk_size: 500
+  overlap: 100
 
 retrieval:
-  top_k: 6
-  rerank_top_n: 2
+  top_k: 5
+  rerank_top_n: 3
+  use_hybrid: true
+  vector_weight: 0.7
+  keyword_weight: 0.3
 
-embedding:
-  dimension: 1024
-  batch_size: 10
+rewrite:
+  use_rewrite: true
+
+logging:
+  level: "INFO"
 
 paths:
-  raw_dir: data/raw
-  processed_file: data/processed/docs.json
-  chunks_file: data/chunks/chunks.json
-  embeddings_file: data/embeddings/all_embeddings.json
+  raw_dir: "data/raw"
+  processed_file: "data/processed/docs.json"
+  chunks_file: "data/chunks/chunks.json"
+  embeddings_file: "data/embeddings/all_embeddings.json"

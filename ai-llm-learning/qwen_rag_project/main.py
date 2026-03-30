@@ -7,12 +7,16 @@ from fastapi.responses import JSONResponse
 from schemas import (
     AskRequest,
     AskResponse,
+    AskData,
     ReferenceItem,
     RebuildIndexResponse,
+    RebuildIndexData,
     SearchRequest,
     SearchResultItem,
     SearchResponse,
+    SearchData,
     ErrorResponse,
+    ErrorData,
 )
 from services.document_service import chunk_documents
 from services.embedding_service import (
@@ -26,7 +30,7 @@ from services.rerank_service import rerank_chunks
 from services.generation_service import generate_answer
 from services.index_service import rebuild_index
 from services.query_rewrite_service import rewrite_query
-from services.logger_service import logger, set_request_id, log_step, log_result
+from services.logger_service import logger, set_request_id, get_request_id, log_step, log_result
 from services.exceptions import AppError, InvalidRequestError
 
 from config import get_config
@@ -55,40 +59,34 @@ async def add_request_id_middleware(request: Request, call_next):
 @app.exception_handler(AppError)
 async def handle_app_error(request: Request, exc: AppError):
     logger.warning(f"[app_error] code={exc.code} | message={exc.message}")
-    return JSONResponse(
+    return build_error_response(
+        message=exc.message,
+        error_code=exc.code,
+        path=request.url.path,
         status_code=exc.status_code,
-        content={
-            "detail": exc.message,
-            "error_code": exc.code,
-            "path": request.url.path,
-        }
     )
 
 
 @app.exception_handler(RequestValidationError)
 async def handle_validation_error(request: Request, exc: RequestValidationError):
     logger.warning(f"[validation_error] errors={exc.errors()}")
-    return JSONResponse(
+    return build_error_response(
+        message="请求参数校验失败",
+        error_code="REQUEST_VALIDATION_ERROR",
+        path=request.url.path,
         status_code=422,
-        content={
-            "detail": "请求参数校验失败",
-            "error_code": "REQUEST_VALIDATION_ERROR",
-            "errors": exc.errors(),
-            "path": request.url.path,
-        }
+        errors=exc.errors(),
     )
 
 
 @app.exception_handler(Exception)
 async def handle_unexpected_error(request: Request, exc: Exception):
     logger.exception(f"[unexpected_error] path={request.url.path} | error={exc}")
-    return JSONResponse(
+    return build_error_response(
+        message="服务器内部异常，请查看日志定位问题。",
+        error_code="INTERNAL_SERVER_ERROR",
+        path=request.url.path,
         status_code=500,
-        content={
-            "detail": "服务器内部异常，请查看日志定位问题。",
-            "error_code": "INTERNAL_SERVER_ERROR",
-            "path": request.url.path,
-        }
     )
 
 
@@ -106,6 +104,30 @@ def ensure_embeddings_ready():
         items, meta = build_chunk_embeddings(chunks)
         save_embeddings(embeddings_file, items, meta)
         log_result("ensure_embeddings_ready", result_count=len(items))
+
+def build_success_response(message: str, data):
+    return {
+        "success": True,
+        "message": message,
+        "data": data,
+        "trace_id": get_request_id(),
+    }
+
+
+def build_error_response(message: str, error_code: str, path: str, status_code: int, errors: list[dict] | None = None):
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "success": False,
+            "message": message,
+            "data": {
+                "error_code": error_code,
+                "path": path,
+                "errors": errors,
+            },
+            "trace_id": get_request_id(),
+        }
+    )
 
 
 @app.get("/")
@@ -192,10 +214,15 @@ def ask(request: AskRequest):
         log_result("ask_api", result_count=len(references), extra={"rewritten_query": rewritten_query})
 
         return AskResponse(
-            original_question=original_question,
-            rewritten_query=rewritten_query,
-            answer=answer,
-            references=references
+            success=True,
+            message="问答成功",
+            data=AskData(
+                original_question=original_question,
+                rewritten_query=rewritten_query,
+                answer=answer,
+                references=references,
+            ),
+            trace_id=get_request_id(),
         )
 
 
@@ -306,11 +333,16 @@ def search(request: SearchRequest):
         )
 
         return SearchResponse(
-            original_question=original_question,
-            rewritten_query=rewritten_query,
-            embedding_results=embedding_items,
-            hybrid_results=hybrid_items,
-            rerank_results=rerank_items
+            success=True,
+            message="检索成功",
+            data=SearchData(
+                original_question=original_question,
+                rewritten_query=rewritten_query,
+                embedding_results=embedding_items,
+                hybrid_results=hybrid_items,
+                rerank_results=rerank_items,
+            ),
+            trace_id=get_request_id(),
         )
 
 
@@ -319,4 +351,17 @@ def rebuild_index_api():
     with log_step("rebuild_index_api"):
         result = rebuild_index()
         log_result("rebuild_index_api", result_count=result["embedding_count"])
-        return RebuildIndexResponse(**result)
+
+        return RebuildIndexResponse(
+            success=True,
+            message=result["message"],
+            data=RebuildIndexData(
+                doc_count=result["doc_count"],
+                chunk_count=result["chunk_count"],
+                embedding_count=result["embedding_count"],
+                processed_file=result["processed_file"],
+                chunks_file=result["chunks_file"],
+                embeddings_file=result["embeddings_file"],
+            ),
+            trace_id=get_request_id(),
+        )

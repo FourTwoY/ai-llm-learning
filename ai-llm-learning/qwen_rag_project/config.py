@@ -57,8 +57,8 @@ def _deep_merge(base: dict, override: dict) -> dict:
     return base
 
 
-def load_config(config_path: str | Path = CONFIG_FILE) -> dict:
-    path = Path(config_path)
+def load_config(config_path: str | Path | None = None) -> dict:
+    path = Path(config_path) if config_path is not None else CONFIG_FILE
     if not path.exists():
         raise FileNotFoundError(f"找不到配置文件：{path}")
 

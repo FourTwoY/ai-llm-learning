@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 import copy
 from pathlib import Path
-
 import yaml
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -10,9 +8,10 @@ CONFIG_FILE = BASE_DIR / "config.yaml"
 
 DEFAULT_CONFIG = {
     "models": {
-        "chat_model": "qwen3-max-2026-01-23",
-        "embedding_model": "text-embedding-v4",
-        "rerank_model": "qwen3-rerank",
+        "generation": "qwen3-max-2026-01-23",
+        "embedding": "text-embedding-v4",
+        "rerank": "qwen3-rerank",
+        "rewrite": "qwen3-max-2026-01-23",
     },
     "chunking": {
         "chunk_size": 500,
@@ -21,10 +20,19 @@ DEFAULT_CONFIG = {
     "retrieval": {
         "top_k": 5,
         "rerank_top_n": 3,
+        "use_hybrid": True,
+        "vector_weight": 0.7,
+        "keyword_weight": 0.3,
+    },
+    "rewrite": {
+        "use_rewrite": True,
     },
     "embedding": {
         "dimension": 1024,
         "batch_size": 10,
+    },
+    "logging": {
+        "level": "INFO",
     },
     "paths": {
         "raw_dir": "data/raw",
@@ -39,8 +47,11 @@ _CONFIG_CACHE: dict | None = None
 
 def _deep_merge(base: dict, override: dict) -> dict:
     for key, value in override.items():
-        if isinstance(value, dict) and isinstance(base.get(key), dict):
-            _deep_merge(base[key], value)
+        base_value = base.get(key)
+        if isinstance(base_value, dict):
+            if not isinstance(value, dict):
+                raise ValueError(f"config key '{key}' must be a mapping/object")
+            _deep_merge(base_value, value)
         else:
             base[key] = value
     return base

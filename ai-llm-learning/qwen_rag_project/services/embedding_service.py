@@ -21,28 +21,43 @@ def get_client() -> OpenAI:
     )
 
 
+def _normalize_batch_size(batch_size: int | None) -> int:
+    if not isinstance(batch_size, int):
+        return 10
+    return max(1, min(batch_size, 10))
+
+
 def embed_texts(texts: list[str]) -> tuple[list[list[float]], dict]:
     if not texts:
         raise DataEmptyError("embedding 输入文本为空。")
 
     cfg = get_config()
     embedding_model = cfg["models"]["embedding"]
+    embedding_dimension = cfg["embedding"]["dimension"]
+    batch_size = _normalize_batch_size(cfg.get("embedding", {}).get("batch_size"))
 
-    with log_step("embedding", text_count=len(texts)):
+    with log_step("embedding", text_count=len(texts), batch_size=batch_size):
         try:
             client = get_client()
-            response = client.embeddings.create(
-                model=embedding_model,
-                input=texts,
-                dimensions=1024,
-                encoding_format="float",
-            )
+            vectors = []
+            usage_list = []
 
-            vectors = [item.embedding for item in response.data]
-            usage = getattr(response, "usage", None)
+            for start in range(0, len(texts), batch_size):
+                batch_texts = texts[start:start + batch_size]
+                response = client.embeddings.create(
+                    model=embedding_model,
+                    input=batch_texts,
+                    dimensions=embedding_dimension,
+                    encoding_format="float",
+                )
 
-            log_result("embedding", result_count=len(vectors), extra={"usage": usage})
-            return vectors, {"usage": str(usage) if usage else None}
+                vectors.extend(item.embedding for item in response.data)
+                usage = getattr(response, "usage", None)
+                if usage is not None:
+                    usage_list.append(str(usage))
+
+            log_result("embedding", result_count=len(vectors), extra={"usage": usage_list or None})
+            return vectors, {"usage": usage_list}
 
         except ConfigError:
             raise

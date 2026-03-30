@@ -8,6 +8,10 @@ chunking:
   chunk_size: 500
   overlap: 100
 
+embedding:
+  dimension: 1024
+  batch_size: 10
+
 retrieval:
   top_k: 5
   rerank_top_n: 3

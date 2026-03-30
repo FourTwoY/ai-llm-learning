@@ -8,9 +8,15 @@ from .logger_service import log_step, log_result
 from config import get_config
 
 
-def split_text(text: str, chunk_size: int = 500, overlap: int = 100) -> list[str]:
+def split_text(text: str, chunk_size: int | None = None, overlap: int | None = None) -> list[str]:
     if not text.strip():
         return []
+
+    cfg = get_config()
+    if chunk_size is None:
+        chunk_size = cfg["chunking"]["chunk_size"]
+    if overlap is None:
+        overlap = cfg["chunking"]["overlap"]
 
     chunks = []
     start = 0
@@ -30,7 +36,11 @@ def split_text(text: str, chunk_size: int = 500, overlap: int = 100) -> list[str
     return chunks
 
 
-def build_chunks(docs: list[dict], chunk_size: int = 500, overlap: int = 100) -> list[dict]:
+def build_chunks(
+    docs: list[dict],
+    chunk_size: int | None = None,
+    overlap: int | None = None,
+) -> list[dict]:
     all_chunks = []
 
     for doc in docs:

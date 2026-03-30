@@ -312,3 +312,11 @@ def search(request: SearchRequest):
             hybrid_results=hybrid_items,
             rerank_results=rerank_items
         )
+
+
+@app.post("/rebuild_index", response_model=RebuildIndexResponse)
+def rebuild_index_api():
+    with log_step("rebuild_index_api"):
+        result = rebuild_index()
+        log_result("rebuild_index_api", result_count=result["embedding_count"])
+        return RebuildIndexResponse(**result)

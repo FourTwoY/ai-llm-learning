@@ -1,12 +1,11 @@
 import math
+
+from config import get_config
 from .embedding_service import embed_texts
+from .exceptions import InvalidRequestError, DataEmptyError
 
 
-# 负责 first-stage retrieval，也就是“问题向量”和“chunk 向量”的第一轮相似度检索
 def cosine_similarity(vec1: list[float], vec2: list[float]) -> float:
-    """
-    计算余弦相似度
-    """
     dot_product = sum(a * b for a, b in zip(vec1, vec2))
     norm1 = math.sqrt(sum(a * a for a in vec1))
     norm2 = math.sqrt(sum(b * b for b in vec2))
@@ -17,12 +16,15 @@ def cosine_similarity(vec1: list[float], vec2: list[float]) -> float:
     return dot_product / (norm1 * norm2)
 
 
-def retrieve_chunks(query: str, embedded_chunks: list[dict], top_k: int = 3) -> list[dict]:
-    """
-    输入 query，返回最相似的 top-k chunk
-    """
+def retrieve_chunks(query: str, embedded_chunks: list[dict], top_k: int | None = None) -> list[dict]:
     if not query.strip():
-        raise ValueError("query 不能为空。")
+        raise InvalidRequestError("query 不能为空。")
+    if not embedded_chunks:
+        raise DataEmptyError("embedded_chunks 不能为空。")
+
+    cfg = get_config()
+    if top_k is None:
+        top_k = cfg["retrieval"]["top_k"]
 
     query_embedding, _ = embed_texts([query])
     query_vector = query_embedding[0]
@@ -35,7 +37,7 @@ def retrieve_chunks(query: str, embedded_chunks: list[dict], top_k: int = 3) -> 
             "doc_id": item.get("doc_id"),
             "source": item.get("source"),
             "text": item["text"],
-            "score": score
+            "score": score,
         })
 
     scored_items.sort(key=lambda x: x["score"], reverse=True)

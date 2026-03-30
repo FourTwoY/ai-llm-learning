@@ -34,6 +34,18 @@ from services.logger_service import logger, set_request_id, get_request_id, log_
 from services.exceptions import AppError, InvalidRequestError
 
 from config import get_config
+import logging
+from config import get_config
+
+cfg = get_config()
+
+logging.basicConfig(
+    level=getattr(logging, cfg["logging"]["level"].upper(), logging.INFO),
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+)
+
+logging.getLogger(__name__).debug("当前日志级别已设置为 DEBUG（如果你能看到这行，说明 dev 生效）")
+
 
 app = FastAPI(
     title="Qwen RAG API",

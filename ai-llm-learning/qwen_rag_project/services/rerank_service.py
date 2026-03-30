@@ -15,6 +15,7 @@ def rerank_chunks(query: str, retrieved_chunks: list[dict], top_k: int | None = 
 
     cfg = get_config()
     rerank_model = cfg["models"]["rerank"]
+    api_key = cfg["dashscope"]["api_key"]
     if top_k is None:
         top_k = cfg["retrieval"]["rerank_top_n"]
 
@@ -24,6 +25,7 @@ def rerank_chunks(query: str, retrieved_chunks: list[dict], top_k: int | None = 
         try:
             resp = dashscope.TextReRank.call(
                 model=rerank_model,
+                api_key=api_key,
                 query=query,
                 documents=documents,
                 top_n=min(top_k, len(documents)),

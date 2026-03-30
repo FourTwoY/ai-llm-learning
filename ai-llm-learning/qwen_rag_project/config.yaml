@@ -1,3 +1,7 @@
+app:
+  name: "qwen_rag_project"
+  env: "dev"
+
 models:
   generation: "qwen3-max-2026-01-23"
   embedding: "text-embedding-v4"
@@ -30,3 +34,15 @@ paths:
   processed_file: "data/processed/docs.json"
   chunks_file: "data/chunks/chunks.json"
   embeddings_file: "data/embeddings/all_embeddings.json"
+
+dashscope:
+  api_key_env: "DASHSCOPE_API_KEY"
+
+environments:
+  dev:
+    logging:
+      level: "DEBUG"
+
+  prod:
+    logging:
+      level: "WARNING"

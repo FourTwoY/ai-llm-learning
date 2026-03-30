@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path
 
 from openai import OpenAI
@@ -11,7 +10,8 @@ from config import get_config
 
 
 def get_client() -> OpenAI:
-    api_key = os.getenv("DASHSCOPE_API_KEY")
+    cfg = get_config()
+    api_key = cfg["dashscope"]["api_key"]
     if not api_key:
         raise ConfigError("没有检测到 DASHSCOPE_API_KEY 环境变量。")
 

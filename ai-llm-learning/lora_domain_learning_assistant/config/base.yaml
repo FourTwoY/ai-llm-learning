@@ -1,0 +1,80 @@
+model:
+  base_model: Qwen/Qwen2.5-0.5B-Instruct
+  adapter_dir: lora_domain_learning_assistant/outputs/lora_adapter
+  max_seq_length: 512
+  use_4bit: false
+  trust_remote_code: true
+  torch_dtype: auto
+  device_map: auto
+  max_new_tokens: 256
+  temperature: 0.2
+  top_p: 0.9
+  do_sample: false
+
+data:
+  raw_dir: qwen_rag_project/data/raw
+  processed_dir: lora_domain_learning_assistant/data/processed
+  train_file: lora_domain_learning_assistant/data/processed/train.jsonl
+  val_file: lora_domain_learning_assistant/data/processed/val.jsonl
+  eval_file: lora_domain_learning_assistant/data/processed/eval.jsonl
+  sample_preview_file: lora_domain_learning_assistant/data/processed/sample_preview.md
+  min_output_chars: 20
+  max_output_chars: 1200
+  duplicate_jaccard_threshold: 0.92
+  train_size: 120
+  val_size: 24
+  eval_size: 24
+  random_seed: 42
+
+lora:
+  lora_r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  bias: none
+  task_type: CAUSAL_LM
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+training:
+  output_dir: lora_domain_learning_assistant/outputs/sft_lora
+  learning_rate: 0.0002
+  num_train_epochs: 1
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 4
+  logging_steps: 5
+  save_steps: 20
+  eval_steps: 20
+  warmup_ratio: 0.03
+  lr_scheduler_type: cosine
+  weight_decay: 0.0
+  fp16: false
+  bf16: false
+  gradient_checkpointing: false
+  smoke_max_train_samples: 8
+  smoke_max_eval_samples: 4
+
+inference:
+  output_file: lora_domain_learning_assistant/reports/inference_results.jsonl
+  batch_input_file: lora_domain_learning_assistant/data/processed/eval.jsonl
+  prefer_adapter: true
+
+evaluation:
+  report_file: lora_domain_learning_assistant/reports/experiment_report.md
+  compare_file: lora_domain_learning_assistant/reports/before_after_compare.md
+  max_eval_samples: 20
+
+api:
+  host: 127.0.0.1
+  port: 8000
+  title: LoRA Domain Learning Assistant API
+  version: 0.1.0
+
+logging:
+  level: INFO

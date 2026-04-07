@@ -1,0 +1,269 @@
+{
+  "question": "帮我查一下本地文档里关于 RAG  的说明",
+  "snapshots": [
+    {
+      "original_question": "帮我查一下本地文档里关于 RAG  的说明",
+      "rewritten_query": "",
+      "used_tools": [],
+      "tool_outputs": {},
+      "final_answer": "",
+      "route": "",
+      "retrieved_chunks": [],
+      "top_k": 3
+    },
+    {
+      "original_question": "帮我查一下本地文档里关于 RAG  的说明",
+      "rewritten_query": "",
+      "used_tools": [
+        "classify"
+      ],
+      "tool_outputs": {
+        "classify": {
+          "route": "retrieval"
+        }
+      },
+      "final_answer": "",
+      "route": "retrieval",
+      "retrieved_chunks": [],
+      "top_k": 3
+    },
+    {
+      "original_question": "帮我查一下本地文档里关于 RAG  的说明",
+      "rewritten_query": "本地文档中关于 RAG 的说明",
+      "used_tools": [
+        "classify",
+        "rewrite_query"
+      ],
+      "tool_outputs": {
+        "classify": {
+          "route": "retrieval"
+        },
+        "rewrite_query": {
+          "rewritten_query": "本地文档中关于 RAG 的说明"
+        }
+      },
+      "final_answer": "",
+      "route": "retrieval",
+      "retrieved_chunks": [],
+      "top_k": 3
+    },
+    {
+      "original_question": "帮我查一下本地文档里关于 RAG  的说明",
+      "rewritten_query": "本地文档中关于 RAG 的说明",
+      "used_tools": [
+        "classify",
+        "rewrite_query",
+        "retrieve_chunks"
+      ],
+      "tool_outputs": {
+        "classify": {
+          "route": "retrieval"
+        },
+        "rewrite_query": {
+          "rewritten_query": "本地文档中关于 RAG 的说明"
+        },
+        "retrieve_chunks": {
+          "query": "本地文档中关于 RAG 的说明",
+          "top_k": 3,
+          "chunks": [
+            {
+              "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_2",
+              "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+              "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+              "score": 0.6120337551279338,
+              "text": "OTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建检索器和生成器，是其在检索任务上的扩展应用。\n- 和 BERT / GPT / ViT / MAE 的关系：\n    - **BERT**：检索器部分常使用 BERT 架构（如 DPR）进行文档编码。\n    - **GPT**：生成器部分可使用 GPT 类解码器，但原文主要使用 BART/T5。\n    - **ViT**：领域不同，但检索增强思想后来被迁移至多模态领域。\n    - **MAE**：无直接关系，但都属于增强模型表示能力的探索。\n    - **Megatron**：RAG 模型规模扩大时可借助 Megatron 等并行技术。\n\n## 8. 我的理解\n该论文是现代 RAG 技术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型"
+            },
+            {
+              "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_3",
+              "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+              "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+              "score": 0.6076647054293204,
+              "text": "术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型与动态数据的桥梁。\n\n## 9. 关键词\nRAG\nRetrieval\nGeneration\nKnowledge-Intensive\nNLP"
+            },
+            {
+              "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_1",
+              "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+              "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+              "score": 0.5648192060704796,
+              "text": "，实现知识的高效利用与更新。\n\n## 4. 模型/方法概述\n提出 RAG 框架，包含两个主要组件：检索器（Retriever）和生成器（Generator）。检索器通常基于 DPR（Dense Passage Retrieval）从外部知识库检索 Top-K 文档。生成器（如 BART 或 T5）将检索到的文档与输入问题拼接，生成最终答案。支持端到端微调。\n\n## 5. 关键创新点\n- **统一检索与生成**：将检索任务与生成任务整合在一个端到端的框架中，联合优化。\n- **非参数化知识更新**：只需更新外部知识库即可更新模型知识，无需重新训练模型参数。\n- **通用性框架**：适用于多种知识密集型任务，如问答、事实验证及对话生成。\n\n## 6. 实验结论\n在开放域问答（OpenQA）、TriviaQA、WebQuestions 等多个基准测试上达到 State-of-the-Art (SOTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建"
+            }
+          ]
+        }
+      },
+      "final_answer": "",
+      "route": "retrieval",
+      "retrieved_chunks": [
+        {
+          "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_2",
+          "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+          "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+          "score": 0.6120337551279338,
+          "text": "OTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建检索器和生成器，是其在检索任务上的扩展应用。\n- 和 BERT / GPT / ViT / MAE 的关系：\n    - **BERT**：检索器部分常使用 BERT 架构（如 DPR）进行文档编码。\n    - **GPT**：生成器部分可使用 GPT 类解码器，但原文主要使用 BART/T5。\n    - **ViT**：领域不同，但检索增强思想后来被迁移至多模态领域。\n    - **MAE**：无直接关系，但都属于增强模型表示能力的探索。\n    - **Megatron**：RAG 模型规模扩大时可借助 Megatron 等并行技术。\n\n## 8. 我的理解\n该论文是现代 RAG 技术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型"
+        },
+        {
+          "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_3",
+          "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+          "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+          "score": 0.6076647054293204,
+          "text": "术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型与动态数据的桥梁。\n\n## 9. 关键词\nRAG\nRetrieval\nGeneration\nKnowledge-Intensive\nNLP"
+        },
+        {
+          "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_1",
+          "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+          "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+          "score": 0.5648192060704796,
+          "text": "，实现知识的高效利用与更新。\n\n## 4. 模型/方法概述\n提出 RAG 框架，包含两个主要组件：检索器（Retriever）和生成器（Generator）。检索器通常基于 DPR（Dense Passage Retrieval）从外部知识库检索 Top-K 文档。生成器（如 BART 或 T5）将检索到的文档与输入问题拼接，生成最终答案。支持端到端微调。\n\n## 5. 关键创新点\n- **统一检索与生成**：将检索任务与生成任务整合在一个端到端的框架中，联合优化。\n- **非参数化知识更新**：只需更新外部知识库即可更新模型知识，无需重新训练模型参数。\n- **通用性框架**：适用于多种知识密集型任务，如问答、事实验证及对话生成。\n\n## 6. 实验结论\n在开放域问答（OpenQA）、TriviaQA、WebQuestions 等多个基准测试上达到 State-of-the-Art (SOTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建"
+        }
+      ],
+      "top_k": 3
+    },
+    {
+      "original_question": "帮我查一下本地文档里关于 RAG  的说明",
+      "rewritten_query": "本地文档中关于 RAG 的说明",
+      "used_tools": [
+        "classify",
+        "rewrite_query",
+        "retrieve_chunks",
+        "generate_answer"
+      ],
+      "tool_outputs": {
+        "classify": {
+          "route": "retrieval"
+        },
+        "rewrite_query": {
+          "rewritten_query": "本地文档中关于 RAG 的说明"
+        },
+        "retrieve_chunks": {
+          "query": "本地文档中关于 RAG 的说明",
+          "top_k": 3,
+          "chunks": [
+            {
+              "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_2",
+              "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+              "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+              "score": 0.6120337551279338,
+              "text": "OTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建检索器和生成器，是其在检索任务上的扩展应用。\n- 和 BERT / GPT / ViT / MAE 的关系：\n    - **BERT**：检索器部分常使用 BERT 架构（如 DPR）进行文档编码。\n    - **GPT**：生成器部分可使用 GPT 类解码器，但原文主要使用 BART/T5。\n    - **ViT**：领域不同，但检索增强思想后来被迁移至多模态领域。\n    - **MAE**：无直接关系，但都属于增强模型表示能力的探索。\n    - **Megatron**：RAG 模型规模扩大时可借助 Megatron 等并行技术。\n\n## 8. 我的理解\n该论文是现代 RAG 技术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型"
+            },
+            {
+              "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_3",
+              "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+              "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+              "score": 0.6076647054293204,
+              "text": "术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型与动态数据的桥梁。\n\n## 9. 关键词\nRAG\nRetrieval\nGeneration\nKnowledge-Intensive\nNLP"
+            },
+            {
+              "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_1",
+              "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+              "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+              "score": 0.5648192060704796,
+              "text": "，实现知识的高效利用与更新。\n\n## 4. 模型/方法概述\n提出 RAG 框架，包含两个主要组件：检索器（Retriever）和生成器（Generator）。检索器通常基于 DPR（Dense Passage Retrieval）从外部知识库检索 Top-K 文档。生成器（如 BART 或 T5）将检索到的文档与输入问题拼接，生成最终答案。支持端到端微调。\n\n## 5. 关键创新点\n- **统一检索与生成**：将检索任务与生成任务整合在一个端到端的框架中，联合优化。\n- **非参数化知识更新**：只需更新外部知识库即可更新模型知识，无需重新训练模型参数。\n- **通用性框架**：适用于多种知识密集型任务，如问答、事实验证及对话生成。\n\n## 6. 实验结论\n在开放域问答（OpenQA）、TriviaQA、WebQuestions 等多个基准测试上达到 State-of-the-Art (SOTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建"
+            }
+          ]
+        },
+        "generate_answer": {
+          "answer": "根据参考材料，本地文档中关于 RAG（Retrieval-Augmented Generation）的说明如下：\n\nRAG 是一种用于知识密集型自然语言处理任务的框架，其核心思想是将“检索”与“生成”相结合。该框架包含两个主要组件：\n\n1. **检索器（Retriever）**：通常基于 DPR（Dense Passage Retrieval），从外部知识库中检索与输入问题最相关的 Top-K 文档。\n2. **生成器（Generator）**：如 BART 或 T5，将检索到的文档与原始问题拼接后生成最终答案。\n\nRAG 的关键创新点包括：\n- 将检索与生成整合在一个端到端可微调的框架中；\n- 支持通过更新外部知识库来实现模型知识的动态更新，而无需重新训练模型参数（即非参数化知识更新）；\n- 具有良好的通用性，适用于开放域问答、事实验证、对话生成等多种任务。\n\n实验表明，RAG 在多个基准测试（如 OpenQA、TriviaQA、WebQuestions）上达到当时最优性能（SOTA），相比仅微调预训练模型，能显著减少事实性错误，提高答案准确性。\n\n此外，RAG 被视为现代 RAG 技术的奠基之作，确立了“检索 + 生成”的主流范式，有效缓解了大模型存在的知识滞后和幻觉问题，实现了参数记忆（模型内部知识）与非参数记忆（外部知识库）的互补。因此，在构建企业级知识库应用和垂直领域问答系统方面具有很高的实用价值。\n\n---\n\n**使用的参考来源 source：**  \n- Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md"
+        }
+      },
+      "final_answer": "根据参考材料，本地文档中关于 RAG（Retrieval-Augmented Generation）的说明如下：\n\nRAG 是一种用于知识密集型自然语言处理任务的框架，其核心思想是将“检索”与“生成”相结合。该框架包含两个主要组件：\n\n1. **检索器（Retriever）**：通常基于 DPR（Dense Passage Retrieval），从外部知识库中检索与输入问题最相关的 Top-K 文档。\n2. **生成器（Generator）**：如 BART 或 T5，将检索到的文档与原始问题拼接后生成最终答案。\n\nRAG 的关键创新点包括：\n- 将检索与生成整合在一个端到端可微调的框架中；\n- 支持通过更新外部知识库来实现模型知识的动态更新，而无需重新训练模型参数（即非参数化知识更新）；\n- 具有良好的通用性，适用于开放域问答、事实验证、对话生成等多种任务。\n\n实验表明，RAG 在多个基准测试（如 OpenQA、TriviaQA、WebQuestions）上达到当时最优性能（SOTA），相比仅微调预训练模型，能显著减少事实性错误，提高答案准确性。\n\n此外，RAG 被视为现代 RAG 技术的奠基之作，确立了“检索 + 生成”的主流范式，有效缓解了大模型存在的知识滞后和幻觉问题，实现了参数记忆（模型内部知识）与非参数记忆（外部知识库）的互补。因此，在构建企业级知识库应用和垂直领域问答系统方面具有很高的实用价值。\n\n---\n\n**使用的参考来源 source：**  \n- Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+      "route": "retrieval",
+      "retrieved_chunks": [
+        {
+          "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_2",
+          "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+          "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+          "score": 0.6120337551279338,
+          "text": "OTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建检索器和生成器，是其在检索任务上的扩展应用。\n- 和 BERT / GPT / ViT / MAE 的关系：\n    - **BERT**：检索器部分常使用 BERT 架构（如 DPR）进行文档编码。\n    - **GPT**：生成器部分可使用 GPT 类解码器，但原文主要使用 BART/T5。\n    - **ViT**：领域不同，但检索增强思想后来被迁移至多模态领域。\n    - **MAE**：无直接关系，但都属于增强模型表示能力的探索。\n    - **Megatron**：RAG 模型规模扩大时可借助 Megatron 等并行技术。\n\n## 8. 我的理解\n该论文是现代 RAG 技术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型"
+        },
+        {
+          "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_3",
+          "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+          "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+          "score": 0.6076647054293204,
+          "text": "术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型与动态数据的桥梁。\n\n## 9. 关键词\nRAG\nRetrieval\nGeneration\nKnowledge-Intensive\nNLP"
+        },
+        {
+          "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_1",
+          "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+          "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+          "score": 0.5648192060704796,
+          "text": "，实现知识的高效利用与更新。\n\n## 4. 模型/方法概述\n提出 RAG 框架，包含两个主要组件：检索器（Retriever）和生成器（Generator）。检索器通常基于 DPR（Dense Passage Retrieval）从外部知识库检索 Top-K 文档。生成器（如 BART 或 T5）将检索到的文档与输入问题拼接，生成最终答案。支持端到端微调。\n\n## 5. 关键创新点\n- **统一检索与生成**：将检索任务与生成任务整合在一个端到端的框架中，联合优化。\n- **非参数化知识更新**：只需更新外部知识库即可更新模型知识，无需重新训练模型参数。\n- **通用性框架**：适用于多种知识密集型任务，如问答、事实验证及对话生成。\n\n## 6. 实验结论\n在开放域问答（OpenQA）、TriviaQA、WebQuestions 等多个基准测试上达到 State-of-the-Art (SOTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建"
+        }
+      ],
+      "top_k": 3
+    }
+  ],
+  "final_state": {
+    "original_question": "帮我查一下本地文档里关于 RAG  的说明",
+    "rewritten_query": "本地文档中关于 RAG 的说明",
+    "used_tools": [
+      "classify",
+      "rewrite_query",
+      "retrieve_chunks",
+      "generate_answer"
+    ],
+    "tool_outputs": {
+      "classify": {
+        "route": "retrieval"
+      },
+      "rewrite_query": {
+        "rewritten_query": "本地文档中关于 RAG 的说明"
+      },
+      "retrieve_chunks": {
+        "query": "本地文档中关于 RAG 的说明",
+        "top_k": 3,
+        "chunks": [
+          {
+            "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_2",
+            "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+            "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+            "score": 0.6120337551279338,
+            "text": "OTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建检索器和生成器，是其在检索任务上的扩展应用。\n- 和 BERT / GPT / ViT / MAE 的关系：\n    - **BERT**：检索器部分常使用 BERT 架构（如 DPR）进行文档编码。\n    - **GPT**：生成器部分可使用 GPT 类解码器，但原文主要使用 BART/T5。\n    - **ViT**：领域不同，但检索增强思想后来被迁移至多模态领域。\n    - **MAE**：无直接关系，但都属于增强模型表示能力的探索。\n    - **Megatron**：RAG 模型规模扩大时可借助 Megatron 等并行技术。\n\n## 8. 我的理解\n该论文是现代 RAG 技术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型"
+          },
+          {
+            "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_3",
+            "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+            "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+            "score": 0.6076647054293204,
+            "text": "术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型与动态数据的桥梁。\n\n## 9. 关键词\nRAG\nRetrieval\nGeneration\nKnowledge-Intensive\nNLP"
+          },
+          {
+            "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_1",
+            "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+            "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+            "score": 0.5648192060704796,
+            "text": "，实现知识的高效利用与更新。\n\n## 4. 模型/方法概述\n提出 RAG 框架，包含两个主要组件：检索器（Retriever）和生成器（Generator）。检索器通常基于 DPR（Dense Passage Retrieval）从外部知识库检索 Top-K 文档。生成器（如 BART 或 T5）将检索到的文档与输入问题拼接，生成最终答案。支持端到端微调。\n\n## 5. 关键创新点\n- **统一检索与生成**：将检索任务与生成任务整合在一个端到端的框架中，联合优化。\n- **非参数化知识更新**：只需更新外部知识库即可更新模型知识，无需重新训练模型参数。\n- **通用性框架**：适用于多种知识密集型任务，如问答、事实验证及对话生成。\n\n## 6. 实验结论\n在开放域问答（OpenQA）、TriviaQA、WebQuestions 等多个基准测试上达到 State-of-the-Art (SOTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建"
+          }
+        ]
+      },
+      "generate_answer": {
+        "answer": "根据参考材料，本地文档中关于 RAG（Retrieval-Augmented Generation）的说明如下：\n\nRAG 是一种用于知识密集型自然语言处理任务的框架，其核心思想是将“检索”与“生成”相结合。该框架包含两个主要组件：\n\n1. **检索器（Retriever）**：通常基于 DPR（Dense Passage Retrieval），从外部知识库中检索与输入问题最相关的 Top-K 文档。\n2. **生成器（Generator）**：如 BART 或 T5，将检索到的文档与原始问题拼接后生成最终答案。\n\nRAG 的关键创新点包括：\n- 将检索与生成整合在一个端到端可微调的框架中；\n- 支持通过更新外部知识库来实现模型知识的动态更新，而无需重新训练模型参数（即非参数化知识更新）；\n- 具有良好的通用性，适用于开放域问答、事实验证、对话生成等多种任务。\n\n实验表明，RAG 在多个基准测试（如 OpenQA、TriviaQA、WebQuestions）上达到当时最优性能（SOTA），相比仅微调预训练模型，能显著减少事实性错误，提高答案准确性。\n\n此外，RAG 被视为现代 RAG 技术的奠基之作，确立了“检索 + 生成”的主流范式，有效缓解了大模型存在的知识滞后和幻觉问题，实现了参数记忆（模型内部知识）与非参数记忆（外部知识库）的互补。因此，在构建企业级知识库应用和垂直领域问答系统方面具有很高的实用价值。\n\n---\n\n**使用的参考来源 source：**  \n- Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md"
+      }
+    },
+    "final_answer": "根据参考材料，本地文档中关于 RAG（Retrieval-Augmented Generation）的说明如下：\n\nRAG 是一种用于知识密集型自然语言处理任务的框架，其核心思想是将“检索”与“生成”相结合。该框架包含两个主要组件：\n\n1. **检索器（Retriever）**：通常基于 DPR（Dense Passage Retrieval），从外部知识库中检索与输入问题最相关的 Top-K 文档。\n2. **生成器（Generator）**：如 BART 或 T5，将检索到的文档与原始问题拼接后生成最终答案。\n\nRAG 的关键创新点包括：\n- 将检索与生成整合在一个端到端可微调的框架中；\n- 支持通过更新外部知识库来实现模型知识的动态更新，而无需重新训练模型参数（即非参数化知识更新）；\n- 具有良好的通用性，适用于开放域问答、事实验证、对话生成等多种任务。\n\n实验表明，RAG 在多个基准测试（如 OpenQA、TriviaQA、WebQuestions）上达到当时最优性能（SOTA），相比仅微调预训练模型，能显著减少事实性错误，提高答案准确性。\n\n此外，RAG 被视为现代 RAG 技术的奠基之作，确立了“检索 + 生成”的主流范式，有效缓解了大模型存在的知识滞后和幻觉问题，实现了参数记忆（模型内部知识）与非参数记忆（外部知识库）的互补。因此，在构建企业级知识库应用和垂直领域问答系统方面具有很高的实用价值。\n\n---\n\n**使用的参考来源 source：**  \n- Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+    "route": "retrieval",
+    "retrieved_chunks": [
+      {
+        "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_2",
+        "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+        "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+        "score": 0.6120337551279338,
+        "text": "OTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建检索器和生成器，是其在检索任务上的扩展应用。\n- 和 BERT / GPT / ViT / MAE 的关系：\n    - **BERT**：检索器部分常使用 BERT 架构（如 DPR）进行文档编码。\n    - **GPT**：生成器部分可使用 GPT 类解码器，但原文主要使用 BART/T5。\n    - **ViT**：领域不同，但检索增强思想后来被迁移至多模态领域。\n    - **MAE**：无直接关系，但都属于增强模型表示能力的探索。\n    - **Megatron**：RAG 模型规模扩大时可借助 Megatron 等并行技术。\n\n## 8. 我的理解\n该论文是现代 RAG 技术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型"
+      },
+      {
+        "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_3",
+        "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+        "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+        "score": 0.6076647054293204,
+        "text": "术的奠基之作，确立了“检索 + 生成”的主流范式。它解决了大模型知识滞后和幻觉的核心痛点，实现了参数记忆与非参数记忆的互补。对于构建企业级知识库应用、垂直领域问答系统具有极高的实用价值，是连接静态模型与动态数据的桥梁。\n\n## 9. 关键词\nRAG\nRetrieval\nGeneration\nKnowledge-Intensive\nNLP"
+      },
+      {
+        "chunk_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks_chunk_1",
+        "doc_id": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+        "source": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks.md",
+        "score": 0.5648192060704796,
+        "text": "，实现知识的高效利用与更新。\n\n## 4. 模型/方法概述\n提出 RAG 框架，包含两个主要组件：检索器（Retriever）和生成器（Generator）。检索器通常基于 DPR（Dense Passage Retrieval）从外部知识库检索 Top-K 文档。生成器（如 BART 或 T5）将检索到的文档与输入问题拼接，生成最终答案。支持端到端微调。\n\n## 5. 关键创新点\n- **统一检索与生成**：将检索任务与生成任务整合在一个端到端的框架中，联合优化。\n- **非参数化知识更新**：只需更新外部知识库即可更新模型知识，无需重新训练模型参数。\n- **通用性框架**：适用于多种知识密集型任务，如问答、事实验证及对话生成。\n\n## 6. 实验结论\n在开放域问答（OpenQA）、TriviaQA、WebQuestions 等多个基准测试上达到 State-of-the-Art (SOTA)。相比仅微调预训练模型，RAG 显著减少了事实性错误，提高了答案准确性。\n\n## 7. 这篇论文和其他论文的关系\n- 和 Transformer 的关系：基于 Transformer 架构构建"
+      }
+    ],
+    "top_k": 3
+  }
+}

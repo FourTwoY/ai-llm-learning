@@ -6,6 +6,15 @@
 
 它的定位不是“大而全的 RAG 框架”，而是一个 **结构清晰、链路完整、便于学习和展示** 的 RAG 后端项目。
 
+## 展示文档
+
+为了方便 GitHub 展示和面试讲解，补充了以下文档：
+
+- [docs/architecture.md](docs/architecture.md)：整体架构、离线建库流程、在线问答流程
+- [docs/api_examples.md](docs/api_examples.md)：启动方式、API 调用示例、curl / Python requests 示例
+- [docs/demo_checklist.md](docs/demo_checklist.md)：Demo 前检查项和推荐截图清单
+- [docs/resume_description.md](docs/resume_description.md)：简历描述和面试回答要点
+
 ---
 
 ## 1. 项目背景

@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+pydantic
+PyYAML
+pytest
+python-dotenv
+openai
+dashscope

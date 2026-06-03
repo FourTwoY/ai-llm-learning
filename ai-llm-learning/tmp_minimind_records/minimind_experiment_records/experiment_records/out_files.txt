@@ -1,3 +1,0 @@
-total 112M
--rw-r--r-- 1 root root 56M Jun  2 09:11 full_sft_512.pth
--rw-r--r-- 1 root root 56M Jun  2 08:40 pretrain_512.pth

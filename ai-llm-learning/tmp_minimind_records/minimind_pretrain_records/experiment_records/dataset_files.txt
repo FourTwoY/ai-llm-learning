@@ -1,8 +1,0 @@
-total 9.8G
--rw-r--r-- 1 root root    0 Dec 24 08:58 __init__.py
-drwxr-xr-x 2 root root   84 Dec 24 09:53 __pycache__
--rwxr-xr-x 1 root root  141 Dec 24 08:58 dataset.md
--rw-r--r-- 1 root root 9.2K Dec 24 08:58 lm_dataset.py
--rw-r--r-- 1 root root 1.6G Dec 24 09:13 pretrain_hq.jsonl
--rw-r--r-- 1 root root 7.1G Dec 24 09:24 sft_512.jsonl
--rw-r--r-- 1 root root 1.2G Dec 24 09:12 sft_mini_512.jsonl

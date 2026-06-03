@@ -31,9 +31,16 @@ Planned。
 
 ### 03 MiniMind Learning
 
-Planned。
+`minimind_learning/` 记录了基于 MiniMind 的轻量级 LLM 训练流程复现实验。
 
-后续作为轻量级 LLM 训练流程学习项目入口，用来理解 pretrain、SFT、inference、数据构造和训练评测等基础流程。当前不虚构完成内容，等完成阶段性实验后再整理。
+已整理内容包括 AutoDL RTX 4090 环境验证、Pretrain、SFT、权重 sha256 对比、推理加载验证和实验问题复盘。该项目重点不是追求模型效果，而是理解 LLM 从数据、训练、权重保存到推理验证的完整链路。
+
+项目文档入口：
+
+- [minimind_learning/README.md](minimind_learning/README.md)
+- [minimind_learning/docs/04_pretrain_experiment.md](minimind_learning/docs/04_pretrain_experiment.md)
+- [minimind_learning/docs/05_sft_experiment.md](minimind_learning/docs/05_sft_experiment.md)
+- [minimind_learning/docs/08_resume_description.md](minimind_learning/docs/08_resume_description.md)
 
 ## 当前重点项目
 
@@ -41,9 +48,12 @@ Planned。
 
 ```text
 qwen_rag_project/
+minimind_learning/
 ```
 
-它已经覆盖一个轻量级 RAG 后端的主要链路：从本地文档读取、切分、向量化，到检索、改写、混合召回、精排和生成回答。项目还补充了配置管理、日志、异常处理和基础测试，比较适合作为暑期实习投递时的代表项目。
+`qwen_rag_project/` 覆盖一个轻量级 RAG 后端的主要链路：从本地文档读取、切分、向量化，到检索、改写、混合召回、精排和生成回答。
+
+`minimind_learning/` 覆盖轻量级 LLM 训练复现实验：从环境检查、Pretrain、SFT，到权重 hash 验证和推理加载观察，适合作为理解底层训练链路的学习项目。
 
 项目文档入口：
 
@@ -68,6 +78,7 @@ ai-llm-learning/
 ├─ projects/                      # 小型综合练习项目
 ├─ qwen_agent_project/            # Qwen Agent / Tool Use 原型练习
 ├─ qwen_rag_project/              # 当前重点展示项目：Qwen RAG 后端
+├─ minimind_learning/              # MiniMind 轻量级 LLM 训练流程复现实验
 ├─ README.md
 └─ requirements.txt
 ```
@@ -76,9 +87,9 @@ ai-llm-learning/
 
 - Stage 1：整理并展示 Qwen RAG 项目
 - Stage 2：学习 MiniCode，理解 Coding Agent / Tool Calling
-- Stage 3：学习 MiniMind，理解 LLM pretrain / SFT / inference
+- Stage 3：整理 MiniMind，理解 LLM pretrain / SFT / inference
 - Stage 4：整合 RAG + Agent + MiniMind，形成完整项目组合
 
 ## Resume Keywords
 
-Python, FastAPI, RAG, Qwen, DashScope, Embedding, Vector Retrieval, Hybrid Retrieval, Rerank, Query Rewrite, Pytest, LLM Application
+Python, FastAPI, RAG, Qwen, DashScope, Embedding, Vector Retrieval, Hybrid Retrieval, Rerank, Query Rewrite, Pytest, LLM Application, MiniMind, Pretrain, SFT, CUDA, PyTorch

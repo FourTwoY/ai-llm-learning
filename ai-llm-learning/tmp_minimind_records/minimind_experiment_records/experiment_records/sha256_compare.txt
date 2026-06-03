@@ -1,0 +1,2 @@
+21d4c07c9d5029047b3cdefc653ed68c678ba1e95e193b8f176459edfff63f78  /root/minimind/out/full_sft_512.pth
+1bae82f1c33a86805b3097d556ce96dca6c8e8e4e8de43be4bd2e6ae3f6e0334  /root/autodl-tmp/minimind/out/full_sft_512.pth
